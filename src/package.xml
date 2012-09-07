@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Gift Exchange Unmanaged</fullName>
+    <types>
+        <members>GiftExchangeController</members>
+        <members>GiftExchangeCronJobs</members>
+        <members>GiftExchangeDailyReport</members>
+        <members>GiftExchangeTestMethods</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>GiftExchange</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
+        <members>GiftExchange</members>
+        <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>Gift_Exchange_Participant__c.Gift_Exchange_Pool__c</members>
+        <members>Gift_Exchange_Participant__c.Got_Gift__c</members>
+        <members>Gift_Exchange_Participant__c.Participant_Name__c</members>
+        <members>Gift_Exchange_Participant__c.Participant__c</members>
+        <members>Gift_Exchange_Participant__c.Selection_Name__c</members>
+        <members>Gift_Exchange_Participant__c.Selection__c</members>
+        <members>Gift_Exchange_Pool__c.Chatter_Group__c</members>
+        <members>Gift_Exchange_Pool__c.Cron_Job_1__c</members>
+        <members>Gift_Exchange_Pool__c.Cron_Job_2__c</members>
+        <members>Gift_Exchange_Pool__c.ExcludeList__c</members>
+        <members>Gift_Exchange_Pool__c.Gift_Giving_Time__c</members>
+        <members>Gift_Exchange_Pool__c.Messages__c</members>
+        <members>Gift_Exchange_Pool__c.Moderator_Name__c</members>
+        <members>Gift_Exchange_Pool__c.Moderator__c</members>
+        <members>Gift_Exchange_Pool__c.Names_Drawn__c</members>
+        <members>Gift_Exchange_Pool__c.Organizer_Name__c</members>
+        <members>Gift_Exchange_Pool__c.Sign_Up_Date__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Gift_Exchange_Participant__c</members>
+        <members>Gift_Exchange_Pool__c</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
+        <members>Gift_Exchange</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>Gift_Exchange_Participant__c-Gift Exchange Participant Layout</members>
+        <members>Gift_Exchange_Pool__c-Gift Exchange Pool Layout</members>
+        <name>Layout</name>
+    </types>
+    <types>
+        <members>Gift_Exchange_Pool__c.All</members>
+        <name>ListView</name>
+    </types>
+    <version>25.0</version>
+</Package>

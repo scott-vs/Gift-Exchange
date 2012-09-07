@@ -1,0 +1,252 @@
+<apex:page controller="GiftExchangeController" title="Gift Exchange" >
+  <apex:form >
+   <apex:actionFunction action="{!deletePool}" name="deletePool"/>
+  
+   <apex:pageMessages id="msgs"/> 
+   
+   
+    <!-- **************************
+           My Pools
+        ************************** -->
+
+    <apex:repeat value="{!myPools}" var="pool">
+        <apex:actionFunction action="{!pool.setGiftGot}" name="setGiftGot"/>
+   
+        <!-- Pool Info -->
+        <apex:pageBlock title="Gift Exchange - {!pool.myPool.name}" >
+            <apex:tabPanel switchType="client" selectedTab="stats" id="pregametab">
+                <apex:tab label="Status" name="stats">
+                    <apex:pageBlockSection columns="1" >
+                         You have signed up for: 
+                         <apex:outputLink value="/{!pool.myPool.Chatter_Group__c}">{!pool.myPool.name}</apex:outputLink> 
+                         <apex:pageBlockSectionItem rendered="{!NOT(pool.myPool.Names_Drawn__c)}">
+                             Names have not been drawn yet. {!pool.inviteMessage}
+                         </apex:pageBlockSectionItem>
+                         <apex:pageBlockSectionItem rendered="{!pool.myPool.Names_Drawn__c}" >
+                            <apex:outputLabel >Your pick: </apex:outputLabel>
+                            <apex:outputLink value="/{!pool.pickUrl}">{!pool.pick} <img src="{!pool.pickPic}" style="padding-right:5px; width:30px;float:left;"/></apex:outputLink>
+                        </apex:pageBlockSectionItem> 
+                    </apex:pageBlockSection>
+                   
+                
+                </apex:tab>
+                <apex:tab label="Do Not Pick" name="donotpick">
+                    <apex:pageBlockSection rendered="{!pool.myPool.Names_Drawn__c}" >
+                        <apex:pageBlockSectionItem >
+                            <p>A name has been picked for you already, so you are unable
+                            to modify your selection at this time.</p>
+                            
+                            <p>If {!pool.pick} was on your &quot;Do Not Pick&quot; list, then Gift Exchange was 
+                            unable to find another participant to replace them with.</p>
+                        </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+                    <apex:pageBlockSection title="Do Not Pick List" collapsible="false" columns="1" rendered="{!NOT(pool.myPool.Names_Drawn__c)}">
+                    <apex:pageBlockSectionItem >
+                        If there is anyone in your pool that should not be chosen for you, like a spouse or relative, please add them
+                        to the exclusion list. 
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        When Gift Exchange picks a name for you on {!pool.deadLine}, it will try avoid picking these names if at all possiable.
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSection columns="3" id="dnpList">
+                        <apex:pageBlockSectionItem id="okTable">
+                            <apex:outputLabel >Participants:</apex:outputLabel>
+                            <apex:selectList size="10" value="{!pool.partSelect}" style="width:200px;" multiselect="false">
+                                <apex:selectOptions value="{!pool.okPicks}"/>
+                            </apex:selectList>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >
+                                <apex:commandButton value=">>" action="{!pool.excludePart}" rerender="dnpList,msgs"/><br/>
+                                <apex:commandButton value="<<" action="{!pool.includePart}" rerender="dnpList"/>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem id="notOkTable">
+                            <apex:outputLabel >Do Not Pick:</apex:outputLabel>
+                            <apex:selectList size="10" value="{!pool.excludeSelect}" style="width:200px;"  multiselect="false">
+                                <apex:selectOptions value="{!pool.notOkPicks}"/>
+                            </apex:selectList>
+                        </apex:pageBlockSectionItem>
+                        </apex:pageBlockSection>
+                    </apex:pageBlockSection>
+                
+                </apex:tab>
+           
+                <apex:tab label="Ask a Question" name="tab2" id="tabTwo" rendered="{!pool.isSignedUp}">
+                    <apex:pageBlockSection columns="1">
+                        <apex:pageBlockSectionItem >
+                            <p>You can send a message to {!pool.pick} anonymously. For example, &quot;What is your t-shirt size?&quot;</p>
+                            <p>All messages are posted from your gift exchange organizer. Be 
+                            sure to keep an eye on the {!pool.myPool.name} Chatter Group for a response.</p>
+                        </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+                    <apex:pageBlockSection >
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel >Send an anonymous message to {!pool.pick}:<br/></apex:outputLabel>
+                            <apex:inputtextarea value="{!pool.myAnonMessage}" style="width:300px;" disabled="{!NOT(pool.myPool.Names_Drawn__c)}"/>
+                        </apex:pageBlockSectionItem>
+                        <apex:commandButton action="{!pool.sendMess}" disabled="{!NOT(pool.myPool.Names_Drawn__c)}" value="Send"/>
+                    </apex:pageBlockSection>
+                    <apex:pageBlockSection rendered="{!pool.myPool.Names_Drawn__c}">
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLink value="{!pool.responseLink}">Search for responses</apex:outputLink>
+                        </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+    
+                
+                </apex:tab>
+                <apex:tab label="Your Gift" name="tab3" id="tabThree" rendered="{!pool.isSignedUp}">
+                    <apex:pageBlockSection >
+                        <apex:pageBlockSectionItem >
+                            Don&#39;t forget your gift! After getting your gift for your 
+                            Gift Exchange pick, check it off here. Otherwise, Gift Exchange
+                            will send you a reminder as the gift exchange gets closer.
+                            
+                        </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+                    <apex:pageBlockSection >
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel >Did you get {!pool.pick} their gift? </apex:outputLabel>
+                            <apex:inputCheckbox value="{!pool.iGotGift}" disabled="{!NOT(pool.myPool.Names_Drawn__c)}" onclick="setGiftGot();"/>
+                       </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+                </apex:tab>
+            </apex:tabPanel>
+            <apex:pageBlockSection columns="1" rendered="{!pool.isSignedUp}">
+                <apex:pageBlockSectionItem >
+                    <apex:outputText value="Your gift exchange takes place on {0,date,MM'/'dd'/'yyyy}">
+                         <apex:param value="{!pool.myPool.Gift_Giving_Time__c}" />
+                    </apex:outputText>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>  
+       
+        </apex:pageBlock>
+        
+          <!-- **************************
+              Admin Panel
+            ************************** -->
+    
+        
+        <apex:pageBlock title="Admin Panel" rendered="{!pool.showAdminPanel}">
+          
+           <apex:pageBlockButtons location="bottom">
+               <apex:commandButton onclick="if (confirm('Are you sure you want to delete this pool?')){deletePool();}else return false;" value="Delete Pool"/>
+               <apex:commandButton action="{!pool.changeSettings}" value="Change" />
+           </apex:pageBlockButtons>
+           <apex:pageBlockSection >
+           
+               <apex:pageBlockSectionItem rendered="{!NOT(pool.myPool.Names_Drawn__c)}">
+                    <apex:outputLabel >Sign Up Deadline:</apex:outputLabel>
+                    <apex:inputField value="{!pool.myPool.Sign_Up_Date__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Gift Exchange:</apex:outputLabel>
+                    <apex:inputField value="{!pool.myPool.Gift_Giving_Time__c}"/>
+                </apex:pageBlockSectionItem>
+    
+           </apex:pageBlockSection>
+    
+        </apex:pageBlock>
+    
+    </apex:repeat>
+    
+   
+   
+   <!-- **************************
+          Setup
+        ************************** -->
+   <apex:pageBlock title="Create a New Gift Exchange" rendered="{!NOT(OR(step1Setup,step2Setup))}">
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandButton value="Get Started Now" action="{!nextPage}"/>
+        </apex:pageBlockButtons>
+        <apex:pageBlockSection columns="1" rendered="{!needNewPool}">
+            <apex:pageBlockSectionItem >
+                <apex:outputPanel >
+                    <!-- <img src="{!$Resource.santa}" style="float:right;" /> -->
+
+                    <p>Welcome to Gift Exchange!</p>
+                    <p>Here&#39;s how you can get your office&#39;s gift exchange up and running this year.</p>
+                    <p><h1>Step 1: Let Gift Exchange create a public group for your organization in Chatter.</h1><br/>
+                    All communication related to your gift exchange can be viewed in the Chatter group.</p>
+                    <p><h1>Step 2: Add users or invite them join the public group.</h1><br/>
+                    A user must join the Chatter group in order to participate in the gift exchange. 
+                    Anyone can join, even Chatter free users.<span style="font-size:80%">*</span> </p>
+                    <p><h1>Step 3: Gift Exchange will randomly assign each Chatter group member a gift giver.</h1><br/>
+                    Prior to sign up deadline, participants can visit the Gift Exchange tab to exclude some recipients 
+                    from being selected for them.  After the sign up deadline, participants can view their gift 
+                    recipient on the Gift Exchange tab.</p>
+                    <p><h1>Step 4: Ask questions.</h1><br/>
+                    If participants have a question for their gift exchange recipient, just ask from the Gift Exchange tab and the app will post 
+                    it anonymously (as you, the organizer) onto the Chatter group.</p>
+                    <p><h1>Step 5: Buy your gift!</h1><br/>
+                    Participants can visit the Gift Exchange tab to check off that they obtained their gift to 
+                    give. Gift Exchange will post reminders on the Chatter group three days and one day before the gift exchange.</p>
+                    <p style="font-size:80%">* Gift Exchange tab is not available for Chatter free users. They will recieve 
+                    special instructions on how to participate with the rest of the group.</p>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+            
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    <apex:pageBlock title="New Pool - Basic Information" rendered="{!step1Setup}">
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandButton value="Back" action="{!prevPage}"/>
+            <apex:commandButton value="Next" action="{!nextPage}"/>
+        </apex:pageBlockButtons>
+        
+        <apex:pageBlockSection >
+       
+            <apex:pageBlockSectionItem >
+                First, what should we call this gift exchange group on Chatter?
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                <apex:inputField value="{!dummyPool.name}" />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                Second, what should be the name of the group&#39;s presenter on Chatter?
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                <apex:inputField value="{!dummyPool.Moderator_Name__c}" />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                Finally, when will the gift exchange take place?
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                <apex:inputField value="{!dummyPool.Gift_Giving_Time__c}" style="display:inline;"/>
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    <apex:pageBlock title="New Pool - Sign Up Deadline" rendered="{!step2Setup}">
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandButton value="Back" action="{!prevPage}"/>
+            <apex:commandButton value="Save and Create" action="{!createNewPool}"/>
+        </apex:pageBlockButtons>
+        
+        <apex:pageBlockSection >
+            <apex:pageBlockSectionItem >
+                Once Gift Exchange has picked names for everyone in the group, you will not
+                be able to add any more participants to the gift exchange.
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem />
+            <apex:pageBlockSectionItem >
+                When should Gift Exchange pick names and end the sign up period?
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                <apex:selectList value="{!deadlinePick}" size="1" multiselect="false">
+                    <apex:selectOption itemLabel="1 Week Before Exchange" itemValue="1"/>
+                    <apex:selectOption itemLabel="2 Weeks Before Exchange" itemValue="2"/>
+                    <apex:selectOption itemLabel="3 Weeks Before Exchange" itemValue="3"/>
+                    
+                </apex:selectList>
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    
+    
+    
+      <script>
+          function setFocusOnLoad() {};
+      </script>
+  </apex:form>
+
+</apex:page>
